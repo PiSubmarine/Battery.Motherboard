@@ -3,11 +3,13 @@
 #include "PiSubmarine/Battery/Persistence/Api/IStore.h"
 #include "PiSubmarine/Chipset/Api/IClient.h"
 #include "PiSubmarine/Error/Api/MakeError.h"
+#include "PiSubmarine/Exceptions.h"
 #include "PiSubmarine/Logging/Api/IFactory.h"
 #include "PiSubmarine/Max17261/Device.h"
 #include <array>
 #include <cstdint>
 #include <spdlog/spdlog.h>
+#include <stdexcept>
 #include <vector>
 
 namespace PiSubmarine::Battery::Motherboard
@@ -157,12 +159,17 @@ namespace PiSubmarine::Battery::Motherboard
 
     Result<Telemetry::Api::State> Provider::GetState() const
     {
+        if (!m_IsInitialized)
+        {
+            return std::unexpected(MakeError(ErrorCondition::ContractError));
+        }
+
         if (m_LastReadError.has_value())
         {
             return std::unexpected(*m_LastReadError);
         }
 
-        if (!m_IsInitialized || !m_HasState)
+        if (!m_HasState)
         {
             return std::unexpected(MakeError(ErrorCondition::NotReady));
         }
@@ -172,7 +179,13 @@ namespace PiSubmarine::Battery::Motherboard
 
     void Provider::Tick(const std::chrono::nanoseconds& uptime, const std::chrono::nanoseconds&)
     {
-        if (!m_IsInitialized || uptime < m_NextRefreshTime)
+        if (!m_IsInitialized)
+        {
+            SPDLOG_LOGGER_CRITICAL(m_Logger, "Battery.Motherboard.Provider::Tick() called before Initialize()");
+            Exceptions::Throw(std::logic_error("Battery.Motherboard.Provider::Tick() called before Initialize()"));
+        }
+
+        if (uptime < m_NextRefreshTime)
         {
             return;
         }
