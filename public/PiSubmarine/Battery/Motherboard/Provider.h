@@ -37,8 +37,14 @@ namespace PiSubmarine::Battery::Motherboard
             Max17261::Device& device,
             Chipset::IClient& chipsetClient,
             Persistence::Api::IStore& store,
+            Logging::Api::IFactory& loggerFactory);
+
+        Provider(
+            Max17261::Device& device,
+            Chipset::IClient& chipsetClient,
+            Persistence::Api::IStore& store,
             Logging::Api::IFactory& loggerFactory,
-            Config config = {});
+            Config config);
 
         [[nodiscard]] Error::Api::Result<void> Initialize();
         [[nodiscard]] Error::Api::Result<Telemetry::Api::State> GetState() const override;

@@ -108,6 +108,15 @@ namespace PiSubmarine::Battery::Motherboard
         Max17261::Device& device,
         Chipset::IClient& chipsetClient,
         Persistence::Api::IStore& store,
+        Logging::Api::IFactory& loggerFactory)
+        : Provider(device, chipsetClient, store, loggerFactory, Config{})
+    {
+    }
+
+    Provider::Provider(
+        Max17261::Device& device,
+        Chipset::IClient& chipsetClient,
+        Persistence::Api::IStore& store,
         Logging::Api::IFactory& loggerFactory,
         Config config) :
         m_Device(device),
