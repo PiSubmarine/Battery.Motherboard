@@ -8,6 +8,7 @@ namespace PiSubmarine::Battery::Motherboard
 {
     struct Config
     {
+		size_t CellsNum = 4;
         Max17261::MicroAmpereHours DesignCapacity{};
         Max17261::MicroAmperes ChargeTerminationCurrent{};
         Max17261::MicroVolts EmptyVoltage{};

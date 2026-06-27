@@ -215,7 +215,8 @@ namespace PiSubmarine::Battery::Motherboard
 
     Result<void> Provider::RefreshState()
     {
-        const auto packVoltageResult = m_Device.GetInstantVoltage();
+		// MAX17261 reports average voltage of a single cell.
+        const auto packVoltageResult = m_Device.GetInstantVoltage() * m_Config.CellsNum;
         if (!packVoltageResult.has_value())
         {
             m_LastReadError = packVoltageResult.error();
