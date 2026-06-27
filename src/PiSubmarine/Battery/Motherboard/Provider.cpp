@@ -216,12 +216,14 @@ namespace PiSubmarine::Battery::Motherboard
     Result<void> Provider::RefreshState()
     {
 		// MAX17261 reports average voltage of a single cell.
-        const auto packVoltageResult = m_Device.GetInstantVoltage() * m_Config.CellsNum;
+        const auto packVoltageResult = m_Device.GetInstantVoltage();
         if (!packVoltageResult.has_value())
         {
             m_LastReadError = packVoltageResult.error();
             return std::unexpected(packVoltageResult.error());
         }
+
+        auto packVolts = Volts(packVoltageResult->ToVolts().Value * m_Config.CellsNum);
 
         const auto packCurrentResult = m_Device.GetInstantCurrent();
         if (!packCurrentResult.has_value())
@@ -294,7 +296,7 @@ namespace PiSubmarine::Battery::Motherboard
         }
 
         m_State = Telemetry::Api::State{
-            .PackVoltage = packVoltageResult->ToVolts(),
+            .PackVoltage = packVolts,
             .ChargerVoltage = *chargerVoltageResult,
             .PackCurrent = packCurrentResult->ToAmperes(),
             .ChargerCurrent = *chargerCurrentResult,
